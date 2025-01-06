@@ -1101,6 +1101,3 @@ def get_references(item):
     dict_keys = [key for key in get_dict.keys() if "reference" in key]
     
     return [get_dict[key] for key in dict_keys]
-
-if __name__ == "__main__":
-    get_organism_codes() 
