@@ -986,6 +986,7 @@ def get_organism_codes(force_download=False):
     org_filename = "organism_code_list"
 
     org_codes = []
+    org_codespath = RES_PATH.joinpath("org_codes.txt")
 
     if force_download:
         organism_fulltext = download_textfile(
@@ -997,13 +998,27 @@ def get_organism_codes(force_download=False):
             org_codes.append(kegg_code)
 
     else:
-        org_codespath = RES_PATH.joinpath("org_codes.txt")
-#        with open("./res/org_codes.txt", "r+") as org_file:
-#            organism_fulltext = org_file.read()
-        organism_fulltext = org_codespath.read_text()
+        # Check if file exists. if it does not, download it and save it
+        if not os.path.exists(org_codespath):
+            if not os.path.isdir(RES_PATH):
+                os.mkdir(RES_PATH)
 
-        for line in organism_fulltext.splitlines():
-            org_codes.append(line)
+            organism_fulltext = download_textfile(
+                org_url, org_filename, verbose=False, force_download=force_download
+            )
+            for line in organism_fulltext.splitlines():
+                _, kegg_code, _, _ = line.strip().split("\t")
+                org_codes.append(kegg_code)
+
+            with open(org_codespath, "w") as f:
+                f.write('\n'.join(org_codes))
+        else:
+    #        with open("./res/org_codes.txt", "r+") as org_file:
+    #            organism_fulltext = org_file.read()
+            organism_fulltext = org_codespath.read_text()
+
+            for line in organism_fulltext.splitlines():
+                org_codes.append(line)
 
     return org_codes
 
@@ -1086,3 +1101,6 @@ def get_references(item):
     dict_keys = [key for key in get_dict.keys() if "reference" in key]
     
     return [get_dict[key] for key in dict_keys]
+
+if __name__ == "__main__":
+    get_organism_codes() 
